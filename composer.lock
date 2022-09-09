@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b9cce62d481fa3af992044e6b6b4584",
+    "content-hash": "39678c788f394a8dc878921052476a21",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -997,6 +997,76 @@
                 }
             ],
             "time": "2022-08-28T14:45:39+00:00"
+        },
+        {
+            "name": "hashids/hashids",
+            "version": "4.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/vinkla/hashids.git",
+                "reference": "8cab111f78e0bd9c76953b082919fc9e251761be"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/vinkla/hashids/zipball/8cab111f78e0bd9c76953b082919fc9e251761be",
+                "reference": "8cab111f78e0bd9c76953b082919fc9e251761be",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.0 || ^9.4",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "ext-bcmath": "Required to use BC Math arbitrary precision mathematics (*).",
+                "ext-gmp": "Required to use GNU multiple precision mathematics (*)."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hashids\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Akimov",
+                    "email": "ivan@barreleye.com"
+                },
+                {
+                    "name": "Vincent Klaiber",
+                    "email": "hello@doubledip.se"
+                }
+            ],
+            "description": "Generate short, unique, non-sequential ids (like YouTube and Bitly) from numbers",
+            "homepage": "https://hashids.org/php",
+            "keywords": [
+                "bitly",
+                "decode",
+                "encode",
+                "hash",
+                "hashid",
+                "hashids",
+                "ids",
+                "obfuscate",
+                "youtube"
+            ],
+            "support": {
+                "issues": "https://github.com/vinkla/hashids/issues",
+                "source": "https://github.com/vinkla/hashids/tree/4.1.0"
+            },
+            "time": "2020-11-26T19:24:33+00:00"
         },
         {
             "name": "inertiajs/inertia-laravel",
@@ -5664,6 +5734,74 @@
                 "source": "https://github.com/tijsverkoyen/CssToInlineStyles/tree/2.2.4"
             },
             "time": "2021-12-08T09:12:39+00:00"
+        },
+        {
+            "name": "veelasky/laravel-hashid",
+            "version": "v3.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/veelasky/laravel-hashid.git",
+                "reference": "ff4aef834dedf9009dcf701c4cfa295ea00c8e6b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/veelasky/laravel-hashid/zipball/ff4aef834dedf9009dcf701c4cfa295ea00c8e6b",
+                "reference": "ff4aef834dedf9009dcf701c4cfa295ea00c8e6b",
+                "shasum": ""
+            },
+            "require": {
+                "hashids/hashids": "^4.0",
+                "illuminate/config": ">=6.18",
+                "illuminate/contracts": ">=6.18",
+                "illuminate/database": ">=6.18",
+                "illuminate/support": ">=6.18",
+                "illuminate/validation": ">=6.18",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": ">=4.0",
+                "phpunit/phpunit": ">=8.5",
+                "roave/security-advisories": "dev-latest"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Veelasky\\LaravelHashId\\HashIdServiceProvider"
+                    ],
+                    "aliases": {
+                        "HashId": "Veelasky\\LaravelHashId\\Facade"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Veelasky\\LaravelHashId\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Rifki Alhuraibi",
+                    "email": "veelasky@pm.com"
+                }
+            ],
+            "description": "HashId Implementation on Laravel Eloquent ORM",
+            "keywords": [
+                "eloquent",
+                "hashid",
+                "hashids",
+                "laravel",
+                "lumen"
+            ],
+            "support": {
+                "issues": "https://github.com/veelasky/laravel-hashid/issues",
+                "source": "https://github.com/veelasky/laravel-hashid/tree/v3.1.0"
+            },
+            "time": "2022-09-01T03:40:37+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
