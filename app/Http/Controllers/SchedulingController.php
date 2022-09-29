@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\App\SchedulingAction;
 use App\Imports\ScheduleImport;
 use App\Models\Scheduling;
 use Illuminate\Http\Request;
@@ -37,11 +38,17 @@ class SchedulingController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Inertia\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, SchedulingAction $action): \Inertia\Response
     {
-        Excel::import(new ScheduleImport, $request->file('file'));
+        $import = new ScheduleImport();
+        Excel::import($import, $request->file('file'));
+
+        return Inertia::render($this->component('Index'), [
+            'pageTitle' => 'Simulasi Penjawalan',
+            'data' => $import->payload,
+        ]);
     }
 
     /**

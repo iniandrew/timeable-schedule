@@ -34,7 +34,7 @@ const submit = () => {
 
     <AuthenticationCard>
         <template #logo>
-            <AuthenticationCardLogo />
+            <img src="https://ypt.or.id/wp-content/uploads/2019/01/Logo-Primer-Horisontal-Tanpa-Tagline-White-768x768.png" width="250" height="250">
         </template>
 
         <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
