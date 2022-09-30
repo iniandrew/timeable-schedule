@@ -6,6 +6,10 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
+/**
+ * @property Collection $welshPowellResult
+ */
+
 class ScheduleImport implements ToCollection, WithHeadingrow
 {
     protected string $color = "abcdefghijklmnopqrstuvwxyz";
@@ -100,7 +104,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                         $this->counterLab++;
                     }
 
-                    if ($this->counterClass == 28 && $this->counterLab == 10) {
+                    if ($this->counterClass === 28 && $this->counterLab === 10) {
                         break;
                     }
                 }
