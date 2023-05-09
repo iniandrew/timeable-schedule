@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SchedulingController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,4 +37,5 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
     Route::resource('scheduling', SchedulingController::class);
+    Route::resource('room', RoomController::class);
 });
