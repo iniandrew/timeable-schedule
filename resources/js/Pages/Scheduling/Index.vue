@@ -52,7 +52,10 @@
                                         SKS
                                     </th>
                                     <th scope="col" class="py-3 px-6">
-                                        Color
+                                        Schedules
+                                    </th>
+                                    <th scope="col" class="py-3 px-6">
+                                        Schedule Time
                                     </th>
                                 </tr>
                                 </thead>
@@ -77,7 +80,10 @@
                                         {{ item.sks }}
                                     </td>
                                     <td class="py-4 px-6">
-                                        {{ item.color }}
+                                        {{ item.schedules }}
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        {{ item.schedule_time }}
                                     </td>
                                 </tr>
                                 </tbody>

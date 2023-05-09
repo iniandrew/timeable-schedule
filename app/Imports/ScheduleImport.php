@@ -21,6 +21,27 @@ class ScheduleImport implements ToCollection, WithHeadingrow
 
     protected int $counterClass = 0;
     protected int $counterLab = 0;
+    protected array $colorList = [
+        "lightcoral", "gray", "lightgray", "firebrick", "red", "chocolate", "darkorange", "moccasin", "gold", "yellow", "darkolivegreen", "chartreuse", "forestgreen", "lime", "mediumaquamarine", "turquoise", "teal", "cadetblue", "dogerblue", "blue", "slateblue", "blueviolet", "magenta", "lightsteelblue" # List of possible color (it has to be equal to the number of nodes (for the worst case), but it's okay because we only need this for the visualisation)
+    ];
+    protected array $scheduleList = [
+        'Senin, 07:00 - 09.50',
+        'Senin, 10.00 - 12.50',
+        'Senin, 13.00 - 15.50',
+        'Selasa, 07:00 - 09.50',
+        'Selasa, 10.00 - 12.50',
+        'Selasa, 13.00 - 15.50',
+        'Rabu, 07:00 - 09.50',
+        'Rabu, 10.00 - 12.50',
+        'Rabu, 13.00 - 15.50',
+        'Kamis, 07:00 - 09.50',
+        'Kamis, 10.00 - 12.50',
+        'Jum\'at, 07.00 - 09.50',
+        'Jum\'at, 10.00 - 12.50',
+        'Jum\'at, 13.00 - 15.50',
+        'Unscheduled',
+    ];
+
 
     /**
      * @param Collection $payload
@@ -32,14 +53,14 @@ class ScheduleImport implements ToCollection, WithHeadingrow
         $payload->sortBy('activity_id');
         $graph = [];
 
-        # init graph with zero
+        # Initialize the graph with zeros
         for ($i = 0; $i < $payload->count(); $i++) {
             for ($j = 0; $j < $payload->count(); $j++) {
                 $graph[$i][$j] = 0;
             }
         }
 
-        # create graph
+        # Assign value to the adjacency matrix by the connectivity of the nodes
         for ($i = 0; $i < $payload->count(); $i++) {
             for ($j = $i + 1; $j < $payload->count(); $j++) {
                 if (
@@ -55,13 +76,14 @@ class ScheduleImport implements ToCollection, WithHeadingrow
         return collect($graph);
     }
 
+    # Main Process
     public function welshPowell(Collection $payload, Collection $graph, Collection $sortedGraph): Collection
     {
         # This algorithm runs in O(N*N) time complexity
         $colorizedNode = collect();
         $listOfColorizedNode = collect();
-        $colorCounterClass = 0;
-        $colorCounterLab = 0;
+        $colorClass = 0; # Color for Class
+        $colorLab = 0; # Color For Laboratory
 
         foreach ($sortedGraph as $node) {
             if ($listOfColorizedNode->contains($node) === false) {
@@ -70,10 +92,10 @@ class ScheduleImport implements ToCollection, WithHeadingrow
 
                 if ($payload[$node][self::COLUMN_ROOM] === self::ROOM_CLASS) {
                     $this->counterClass = 1; $this->counterLab = 0;
-                    $colorizedNode[$node] = $this->color[$colorCounterClass];
+                    $colorizedNode[$node] = $colorClass;
                 } else if ($payload[$node][self::COLUMN_ROOM] === self::ROOM_LAB) {
                     $this->counterClass = 0; $this->counterLab = 1;
-                    $colorizedNode[$node] = $this->color[$colorCounterLab];
+                    $colorizedNode[$node] = $colorLab;
                 }
 
                 // process 2
@@ -86,7 +108,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                         $payload[$adjacentNode][self::COLUMN_ROOM] === self::ROOM_CLASS &&
                         $this->counterClass < 28
                     ) {
-                        $colorizedNode[$adjacentNode] = $this->color[$colorCounterClass];
+                        $colorizedNode[$adjacentNode] = $colorClass;
                         $listOfColorizedNode->push($adjacentNode);
                         $listOfAdjacentNode->push($adjacentNode);
                         $this->counterClass++;
@@ -98,24 +120,27 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                         $payload[$adjacentNode][self::COLUMN_ROOM] === self::ROOM_LAB &&
                         $this->counterLab < 10
                     ) {
-                        $colorizedNode[$adjacentNode] = $this->color[$colorCounterLab];
+                        $colorizedNode[$adjacentNode] = $colorLab;
                         $listOfColorizedNode->push($adjacentNode);
                         $listOfAdjacentNode->push($adjacentNode);
                         $this->counterLab++;
                     }
 
+                    # If the counter has reached the maximum input, then break the loop
                     if ($this->counterClass === 28 && $this->counterLab === 10) {
                         break;
                     }
                 }
 
-                $colorCounterClass++;
-                $colorCounterLab++;
+                $colorClass++;
+                $colorLab++;
             }
         }
 
+        # Activity is the colorized node, schedule is the color of a node
         foreach ($payload as $key => $value) {
-            $payload[$key]['color'] = $colorizedNode[$key];
+            $payload[$key]['schedules'] = $colorizedNode[$key];
+            $payload[$key]['schedule_time'] = $this->scheduleList[$colorizedNode[$key]];
         }
 
         return collect($payload);
@@ -131,16 +156,17 @@ class ScheduleImport implements ToCollection, WithHeadingrow
         return true;
     }
 
+    # Main function
     public function collection(Collection $collection): Collection
     {
         $graph = $this->initGraph($collection);
 
-        # sum of all vertex degree
-        $counter = $graph->map(fn(array $data) => count(array_filter($data, static fn($value) => (bool) $value)));
+        # Calculate the degree of each node, here's node as the key and its degree as the value of dictionary
+        $nodeDegree = $graph->map(fn(array $data) => count(array_filter($data, static fn($value) => (bool) $value)));
 
-        # sort the vertex with the highest degree
-        $sortedGraph = $counter->sortDesc()->keys();
+        # Sort the nodes by its degree in descending order
+        $sortedNode = $nodeDegree->sortDesc()->keys();
 
-        return $this->welshPowellResult = $this->welshPowell($collection, $graph, $sortedGraph);
+        return $this->welshPowellResult = $this->welshPowell($collection, $graph, $sortedNode);
     }
 }
