@@ -26,7 +26,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::redirect('/', '/dashboard');
+Route::redirect('/', '/scheduling');
 
 Route::middleware([
     'auth:sanctum',

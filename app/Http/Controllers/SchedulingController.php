@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Imports\ScheduleImport;
-use App\Models\Scheduling;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -31,7 +30,15 @@ class SchedulingController extends Controller
      */
     public function store(Request $request): \Inertia\Response
     {
-        $actionImport = new ScheduleImport();
+        // TODO: Add validation
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+            'max_class' => 'required|numeric',
+            'max_lab' => 'required|numeric',
+        ]);
+
+        $actionImport = new ScheduleImport($request);
         Excel::import($actionImport, $request->file('file'));
 
         return Inertia::render($this->component('Index'), [

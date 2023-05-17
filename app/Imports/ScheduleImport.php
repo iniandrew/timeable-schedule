@@ -2,6 +2,8 @@
 
 namespace App\Imports;
 
+use App\Models\Room;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -12,7 +14,13 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class ScheduleImport implements ToCollection, WithHeadingrow
 {
-    protected string $color = "abcdefghijklmnopqrstuvwxyz";
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+        $this->maxClass = $request->input('max_class') ?? 28; // default is 28
+        $this->maxLab = $request->input('max_lab') ?? 10; // default is 10
+    }
+
     protected const ROOM_CLASS = "KELAS";
     protected const ROOM_LAB = "LAB";
     protected const COLUMN_STUDENTS_SETS = "students_sets";
@@ -21,9 +29,6 @@ class ScheduleImport implements ToCollection, WithHeadingrow
 
     protected int $counterClass = 0;
     protected int $counterLab = 0;
-    protected array $colorList = [
-        "lightcoral", "gray", "lightgray", "firebrick", "red", "chocolate", "darkorange", "moccasin", "gold", "yellow", "darkolivegreen", "chartreuse", "forestgreen", "lime", "mediumaquamarine", "turquoise", "teal", "cadetblue", "dogerblue", "blue", "slateblue", "blueviolet", "magenta", "lightsteelblue" # List of possible color (it has to be equal to the number of nodes (for the worst case), but it's okay because we only need this for the visualisation)
-    ];
     protected array $scheduleList = [
         'Senin, 07:00 - 09.50',
         'Senin, 10.00 - 12.50',
@@ -76,7 +81,32 @@ class ScheduleImport implements ToCollection, WithHeadingrow
         return collect($graph);
     }
 
+    // Untuk kelas yang jadwanya sama maka kelasnya berbeda, based on schedules id
+    public function determineRoom(Collection $payload): string
+    {
+        $selectedRoom = '';
+        $roomType = match ($payload['room']) {
+            self::ROOM_CLASS => 'KTT',
+            self::ROOM_LAB => 'LAB',
+        };
+
+        $filteredRoom = Room::query()->where('name', 'like', $roomType . '%')->get()->toArray();
+
+        foreach ($this->scheduleList as $key => $schedule) {
+            if ($payload['schedules'] === $key) {
+                $selectedRoom = $filteredRoom[random_int(0, count($this->scheduleList) - 1)]['name'];
+            }
+        }
+
+        return $selectedRoom;
+    }
+
     # Main Process
+    /**
+        *Constraint:
+        1. Two or more activities can't share the same teacher or the same students sets in a single schedule
+        2. Maximum number of classroom and laboratorium used in a single schedule is 28 and 10, respectively
+     */
     public function welshPowell(Collection $payload, Collection $graph, Collection $sortedGraph): Collection
     {
         # This algorithm runs in O(N*N) time complexity
@@ -106,7 +136,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                         $this->isNotAdjacent($adjacentNode, $listOfAdjacentNode, $graph) === true &&
                         $listOfColorizedNode->contains($adjacentNode) === false &&
                         $payload[$adjacentNode][self::COLUMN_ROOM] === self::ROOM_CLASS &&
-                        $this->counterClass < 28
+                        $this->counterClass < $this->maxClass
                     ) {
                         $colorizedNode[$adjacentNode] = $colorClass;
                         $listOfColorizedNode->push($adjacentNode);
@@ -118,7 +148,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                         $this->isNotAdjacent($adjacentNode, $listOfAdjacentNode, $graph) === true &&
                         $listOfColorizedNode->contains($adjacentNode) === false &&
                         $payload[$adjacentNode][self::COLUMN_ROOM] === self::ROOM_LAB &&
-                        $this->counterLab < 10
+                        $this->counterLab < $this->maxLab
                     ) {
                         $colorizedNode[$adjacentNode] = $colorLab;
                         $listOfColorizedNode->push($adjacentNode);
@@ -127,7 +157,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
                     }
 
                     # If the counter has reached the maximum input, then break the loop
-                    if ($this->counterClass === 28 && $this->counterLab === 10) {
+                    if ($this->counterClass === $this->maxClass && $this->counterLab === $this->maxLab) {
                         break;
                     }
                 }
@@ -141,6 +171,7 @@ class ScheduleImport implements ToCollection, WithHeadingrow
         foreach ($payload as $key => $value) {
             $payload[$key]['schedules'] = $colorizedNode[$key];
             $payload[$key]['schedule_time'] = $this->scheduleList[$colorizedNode[$key]];
+            $payload[$key]['room'] = $this->determineRoom($value);
         }
 
         return collect($payload);
